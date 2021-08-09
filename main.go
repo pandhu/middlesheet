@@ -47,7 +47,7 @@ func main() {
 	router := httprouter.New()
 	router.GET("/", Index)
 
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), router))
 }
 
 func fetchData(url string) *http.Response {
