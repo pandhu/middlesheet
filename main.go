@@ -5,33 +5,25 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"os"
 	"net/http"
+	"os"
 
-	"github.com/julienschmidt/httprouter"
 	"github.com/joho/godotenv"
+	"github.com/julienschmidt/httprouter"
 )
 
 type GSheetData struct {
 	Version  string `json:"version"`
 	Encoding string `json:"encoding"`
-	Feed struct {
-		Entry    []struct {
+	Feed     struct {
+		Entry []struct {
 			Cell struct {
-				Row        string    `json:"row"`
-				Col        string    `json:"col"`
-				Value			 string 	 `json:"inputValue"`
+				Row   string `json:"row"`
+				Col   string `json:"col"`
+				Value string `json:"inputValue"`
 			} `json:"gs$cell"`
 		} `json:"entry"`
 	} `json:"feed"`
-}
-
-type Payload struct {
-	Data []Row
-}
-type Row struct {
-	name	string
-	comment string
 }
 
 func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
@@ -64,7 +56,7 @@ func getJsonResponse() ([]byte, error) {
 	data, _ := ioutil.ReadAll(response.Body)
 
 	var gsheetData GSheetData
-  json.Unmarshal([]byte(data), &gsheetData)
+	json.Unmarshal([]byte(data), &gsheetData)
 
 	return buildResponse(gsheetData)
 }
@@ -78,7 +70,7 @@ func buildResponse(gsheetData GSheetData) ([]byte, error) {
 	return js, err
 }
 
-func getKeys(gsheetData GSheetData) ([]string) {
+func getKeys(gsheetData GSheetData) []string {
 	entries := gsheetData.Feed.Entry
 	var keys []string
 	for _, s := range entries {
@@ -90,9 +82,8 @@ func getKeys(gsheetData GSheetData) ([]string) {
 	return keys
 }
 
-func buildResult(keys []string, gsheetData GSheetData) ([]map[string]string) {
+func buildResult(keys []string, gsheetData GSheetData) []map[string]string {
 	entries := gsheetData.Feed.Entry
-
 
 	chunkSize := len(keys)
 
@@ -112,7 +103,7 @@ func buildResult(keys []string, gsheetData GSheetData) ([]map[string]string) {
 
 	for _, data := range arrData {
 		row := make(map[string]string)
-		for i := 0; i <  len(keys); i++ {
+		for i := 0; i < len(keys); i++ {
 			row[keys[i]] = data[i]
 		}
 		result = append(result, row)
